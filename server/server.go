@@ -2,66 +2,34 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"go-chi-boilerplate/config"
 	"go-chi-boilerplate/routes"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 )
-
-// serverConfigs contains configuration options for the HTTP server.
-type serverConfigs struct {
-	port             string // The port number on which to start the server.
-	gracefulShutdown bool   // Whether to use graceful shutdown when stopping the server.
-	serviceName      string // The service name to configure on logs and metrics
-}
 
 // Run starts the HTTP server.
 func Run() {
 	// Get the server configuration options from environment variables.
-	serverConfigs := getConfigs()
+	serverConfigs := config.GetServerConfigs()
 
 	// Initialize the router with the application's routes.
-	router := routes.SetupRouter(serverConfigs.serviceName)
+	router := routes.SetupRouter(serverConfigs.ServiceName)
 
 	// Create an HTTP server with the specified address and router.
 	server := &http.Server{
-		Addr:    serverConfigs.port,
+		Addr:    serverConfigs.Port,
 		Handler: router,
 	}
 
 	// Start the server with or without graceful shutdown.
-	if serverConfigs.gracefulShutdown {
-		startWithGracefulShutdown(serverConfigs.serviceName, server)
+	if serverConfigs.GracefulShutdown {
+		startWithGracefulShutdown(serverConfigs.ServiceName, server)
 	} else {
-		start(serverConfigs.serviceName, server)
-	}
-}
-
-// getConfigs gets the server configuration options from environment variables.
-func getConfigs() *serverConfigs {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	// Get the serviceName from the environment variable or use a default value
-	serviceName := os.Getenv("SERVICE_NAME")
-	if serviceName == "" {
-		serviceName = "go-chi-boilerplate"
-	}
-
-	gracefulShutdown, err := strconv.ParseBool(os.Getenv("ENABLE_GRACEFUL_SHUTDOWN"))
-	if err != nil {
-		gracefulShutdown = true
-	}
-	return &serverConfigs{
-		port:             fmt.Sprintf(":%s", port),
-		gracefulShutdown: gracefulShutdown,
-		serviceName:      serviceName,
+		start(serverConfigs.ServiceName, server)
 	}
 }
 
