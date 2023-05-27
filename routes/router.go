@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // InitRouter initializes the Chi router and sets up the middleware and routes.

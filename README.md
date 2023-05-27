@@ -9,14 +9,18 @@ Golang Chi Boilerplate
 
 Features
 --------
-
+1. Configurable Graceful Shutdown
+2. Custom ports
+2. Health check for Kubernetes
+3. Prometheus Metrics
 
 Environment Veriables
 ---------------------
 
 | Variable | Description | Default |
 | --- | --- | --- |
-
+| ENABLE_GRACEFUL_SHUTDOWN | To enable graceful shutdown of the application | true |
+| API_VERSION | Set API version for the application  |  v1.0.0  |
 
 
 License
