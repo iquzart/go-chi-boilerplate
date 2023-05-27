@@ -1,12 +1,15 @@
 package routes
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	customMiddleware "go-chi-boilerplate/middlewares"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // InitRouter initializes the Chi router and sets up the middleware and routes.
-func InitRouter() *chi.Mux {
+func SetupRouter(serviceName string) *chi.Mux {
+
 	// Create a new Chi router instance.
 	router := chi.NewRouter()
 
@@ -16,15 +19,18 @@ func InitRouter() *chi.Mux {
 	// Use the Chi recovery middleware to recover from panics and return an error response instead of crashing.
 	router.Use(middleware.Recoverer)
 
+	// Use the Prometheus middleware to instrument the router with metrics.
+	router.Use(customMiddleware.PrometheusMetrics(serviceName))
+
 	// Add the routes to router.
-	getRoutes(router)
+	addRoutes(router)
 
 	// Return the initialized Chi router.
 	return router
 }
 
 // getRoutes adds the system and application routes to the specified router.
-func getRoutes(r chi.Router) {
+func addRoutes(r chi.Router) {
 	// Add the routes for the System.
 	addSystemRoutes(r)
 	// Add the routes for app.

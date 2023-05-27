@@ -3,7 +3,7 @@ package routes
 import (
 	controllers "go-chi-boilerplate/controllers/api"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // addAPIRoutes adds the routes for the API controller to the specified router group.

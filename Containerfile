@@ -25,10 +25,8 @@ RUN apk update && rm -rf /var/cache/apk/*
 # Image info
 LABEL \
     maintainer="Muhammed Iqbal <iquzart@hotmail.com>" \
-    description="Go Gin Application"
+    description="Go Chi Application"
 
-# Set GIN Mode as Release
-ENV GIN_MODE=release
 
 # Container PORT
 ENV PORT="8080"
