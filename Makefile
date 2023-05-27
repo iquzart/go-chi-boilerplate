@@ -2,9 +2,9 @@
 .PHONY: help clean build run docker-build docker-run docker-stop
 
 # Define variables
-BINARY_NAME := gin-boilerplate
-DOCKER_IMAGE := make-gin-boilerplate
-DOCKER_CONTAINER := make-gin-boilerplate
+BINARY_NAME := go-chi-boilerplate
+DOCKER_IMAGE := make-go-chi-boilerplate
+DOCKER_CONTAINER := make-go-chi-boilerplate
 MAIN_FILE := cmd/main.go
 LDFLAGS := -ldflags="-s -w"
 
