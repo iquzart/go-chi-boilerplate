@@ -37,11 +37,3 @@ func getEnvOrDefaultBool(key string, defaultValue bool) bool {
 	}
 	return value
 }
-
-// func getEnvOrFail(key string) string {
-// 	value := os.Getenv(key)
-// 	if value == "" {
-// 		log.Fatalf("%s environment variable not set", key)
-// 	}
-// 	return value
-// }

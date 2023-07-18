@@ -1,13 +1,13 @@
 package routes
 
 import (
-	controllers "go-chi-boilerplate/controllers/api"
+	controllers "go-chi-boilerplate/internal/interfaces/api/controllers"
 
 	"github.com/go-chi/chi/v5"
 )
 
 // addAPIRoutes adds the routes for the API controller to the specified router group.
-func addAPIRoutes(rg chi.Router) {
+func AddAPIRoutes(rg chi.Router) {
 	// Create a new group of routes for the API controller under the specified router group.
 	api := chi.NewRouter()
 

@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"go-chi-boilerplate/config"
-	"go-chi-boilerplate/routes"
+	"go-chi-boilerplate/internal/router"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +17,7 @@ func Run() {
 	serverConfigs := config.GetServerConfigs()
 
 	// Initialize the router with the application's routes.
-	router := routes.SetupRouter(serverConfigs.ServiceName)
+	router := router.SetupRouter(serverConfigs.ServiceName)
 
 	// Create an HTTP server with the specified address and router.
 	server := &http.Server{
