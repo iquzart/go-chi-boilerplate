@@ -5,7 +5,7 @@
 BINARY_NAME := go-chi-boilerplate
 DOCKER_IMAGE := make-go-chi-boilerplate
 DOCKER_CONTAINER := make-go-chi-boilerplate
-MAIN_FILE := cmd/main.go
+MAIN_FILE := cmd/app/main.go
 LDFLAGS := -ldflags="-s -w"
 
 help: ## Display this help message

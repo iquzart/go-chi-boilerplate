@@ -1,6 +1,6 @@
 package main
 
-import "go-chi-boilerplate/server"
+import "go-chi-boilerplate/pkg/server"
 
 func main() {
 	// Start the server

@@ -1,7 +1,8 @@
-package routes
+package router
 
 import (
-	customMiddleware "go-chi-boilerplate/middlewares"
+	routes "go-chi-boilerplate/internal/interfaces/api/routes"
+	customMiddleware "go-chi-boilerplate/internal/middlewares"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -32,7 +33,7 @@ func SetupRouter(serviceName string) *chi.Mux {
 // getRoutes adds the system and application routes to the specified router.
 func addRoutes(r chi.Router) {
 	// Add the routes for the System.
-	addSystemRoutes(r)
+	routes.AddSystemRoutes(r)
 	// Add the routes for app.
-	addAPIRoutes(r)
+	routes.AddAPIRoutes(r)
 }

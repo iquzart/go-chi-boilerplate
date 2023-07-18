@@ -1,7 +1,7 @@
 package routes
 
 import (
-	controllers "go-chi-boilerplate/controllers/system"
+	controllers "go-chi-boilerplate/internal/interfaces/api/controllers"
 
 	"net/http"
 
@@ -10,7 +10,7 @@ import (
 )
 
 // addSystemRoutes adds the routes for the System controller to the specified router.
-func addSystemRoutes(r chi.Router) {
+func AddSystemRoutes(r chi.Router) {
 	// Create a new sub-router for the System controller under the specified router.
 	system := chi.NewRouter()
 
