@@ -34,7 +34,7 @@ jobs:
 
     - name: Build
       run: |
-        go build -o app cmd/main.go
+        go build -o app cmd/app/main.go
 
     - name: Test
       run: |
