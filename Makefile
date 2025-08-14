@@ -5,7 +5,7 @@
 BINARY_NAME := go-chi-boilerplate
 DOCKER_IMAGE := make-go-chi-boilerplate
 DOCKER_CONTAINER := make-go-chi-boilerplate
-MAIN_FILE := cmd/app/main.go
+MAIN_FILE := cmd/api/main.go
 LDFLAGS := -ldflags="-s -w"
 
 help: ## Display this help message
@@ -24,6 +24,7 @@ build: ## Build the binary file
 	go build $(LDFLAGS) -o $(BINARY_NAME) $(MAIN_FILE)
 
 run: ## Build and run the binary file
+	swag init -g cmd/api/main.go -o docs;
 	go run $(LDFLAGS) $(MAIN_FILE)
 
 docker-build: ## Build Docker image

@@ -1,39 +1,29 @@
 package router
 
 import (
-	routes "go-chi-boilerplate/internal/interfaces/api/routes"
-	customMiddleware "go-chi-boilerplate/internal/middlewares"
+	"go-chi-boilerplate/internal/adapter/api/routes"
+	"go-chi-boilerplate/internal/meta"
+	"log/slog"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-// InitRouter initializes the Chi router and sets up the middleware and routes.
-func SetupRouter(serviceName string) *chi.Mux {
+func SetupRouter(serviceName string, logger *slog.Logger) *chi.Mux {
+	r := chi.NewRouter()
 
-	// Create a new Chi router instance.
-	router := chi.NewRouter()
+	r.Use(otelhttp.NewMiddleware(serviceName))
+	r.Use(meta.LoggingMiddleware(logger))
+	r.Use(meta.MetricsMiddleware)
+	r.Use(middleware.Recoverer)
 
-	// Use the Chi logger middleware to log HTTP requests and responses.
-	router.Use(middleware.Logger)
-
-	// Use the Chi recovery middleware to recover from panics and return an error response instead of crashing.
-	router.Use(middleware.Recoverer)
-
-	// Use the Prometheus middleware to instrument the router with metrics.
-	router.Use(customMiddleware.PrometheusMetrics(serviceName))
-
-	// Add the routes to router.
-	addRoutes(router)
-
-	// Return the initialized Chi router.
-	return router
+	registerRoutes(r)
+	return r
 }
 
-// getRoutes adds the system and application routes to the specified router.
-func addRoutes(r chi.Router) {
-	// Add the routes for the System.
+func registerRoutes(r chi.Router) {
 	routes.AddSystemRoutes(r)
-	// Add the routes for app.
-	routes.AddAPIRoutes(r)
+	routes.AddApiRoutes(r)
 }

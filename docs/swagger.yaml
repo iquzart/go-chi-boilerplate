@@ -1,0 +1,49 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: This is the go-chi-boilerplate API documentation.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: go-chi-boilerplate API
+  version: "1.0"
+paths:
+  /api/version:
+    get:
+      description: Returns the current version of the API in JSON format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API version
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get API version
+      tags:
+      - api
+  /system/health:
+    get:
+      consumes:
+      - application/json
+      description: Get the health status of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Show the health status
+      tags:
+      - system
+schemes:
+- http
+swagger: "2.0"
