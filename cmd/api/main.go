@@ -5,6 +5,7 @@ import (
 	"go-chi-boilerplate/internal/adapters/primary/http/server"
 	"go-chi-boilerplate/internal/config"
 	"go-chi-boilerplate/internal/meta"
+	"log/slog"
 	"time"
 )
 
@@ -21,23 +22,34 @@ import (
 // @BasePath /
 // @schemes http
 func main() {
-	cfg := config.GetServerConfigs()
+	// Load configs
+	cfg, err := config.GetAppConfigs()
+	if err != nil {
+		meta.Fatal(meta.NewLogger("error"), "failed to load application configs", "error", err)
+	}
 
-	logger := meta.NewLogger(cfg.LogLevel)
+	// Init logger
+	logger := meta.NewLogger(cfg.Server.LogLevel)
 
+	// Init metrics
 	meta.InitMetrics()
 
-	tp, err := meta.InitTracer(cfg.ServiceName, cfg.OTLPEndpoint, logger)
+	// Init tracer
+	tp, err := meta.InitTracer(cfg.Server.ServiceName, cfg.Server.OTLPEndpoint, logger)
 	if err != nil {
-		logger.Error("failed to initialize tracer", "error", err)
+		meta.Fatal(logger, "failed to initialize tracer", "error", err)
 	}
-	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := tp.Shutdown(ctx); err != nil {
-			logger.Error("failed to shutdown tracer", "error", err)
-		}
-	}()
+	defer shutdownTracer(tp, logger)
 
-	server.New(cfg, logger).Run()
+	// Start server
+	server.New(cfg.Server, logger).Run()
+}
+
+func shutdownTracer(tp interface{ Shutdown(context.Context) error }, logger *slog.Logger) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := tp.Shutdown(ctx); err != nil {
+		logger.Error("failed to shutdown tracer", "error", err)
+	}
 }
