@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/primary/http/server"
+	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
 	"go-chi-boilerplate/internal/config"
 	"go-chi-boilerplate/internal/meta"
-	"go-chi-boilerplate/internal/server"
+	"log/slog"
 	"time"
 )
 
@@ -21,21 +23,51 @@ import (
 // @BasePath /
 // @schemes http
 func main() {
-	cfg := config.GetServerConfigs()
-
-	logger := meta.NewLogger(cfg.LogLevel)
-
-	tp, err := meta.InitTracer(cfg.ServiceName, cfg.OTLPEndpoint, logger)
+	// Load configs
+	cfg, err := config.GetAppConfigs()
 	if err != nil {
-		logger.Error("failed to initialize tracer", "error", err)
+		meta.Fatal(meta.NewLogger("error"), "failed to load application configs", "error", err)
 	}
-	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := tp.Shutdown(ctx); err != nil {
-			logger.Error("failed to shutdown tracer", "error", err)
-		}
-	}()
 
-	server.New(cfg, logger).Run()
+	// Init logger
+	logger := meta.NewLogger(cfg.Server.LogLevel)
+
+	// Init metrics
+	meta.InitMetrics()
+
+	// Init tracer
+	tp, err := meta.InitTracer(cfg.Server.ServiceName, cfg.Server.OTLPEndpoint, logger)
+	if err != nil {
+		meta.Fatal(logger, "failed to initialize tracer", "error", err)
+	}
+	defer shutdownTracer(tp, logger)
+
+	// Connect to PostgreSQL
+	db, err := postgresql.New(cfg.Database, logger)
+	if err != nil {
+		meta.Fatal(logger, "failed to connect to database", "error", err)
+	}
+	defer db.Close()
+
+	// Initialize PostgreSQL metrics
+	meta.InitDBMetrics(db)
+
+	// Optional: run migrations
+	// if err := postgresql.RunMigrations(db, "./migrations"); err != nil {
+	//     meta.Fatal(logger, "failed to run migrations", "error", err)
+	// }
+
+	// Start HTTP server
+
+	// Start server
+	server.New(cfg.Server, logger, db).Run()
+}
+
+func shutdownTracer(tp interface{ Shutdown(context.Context) error }, logger *slog.Logger) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := tp.Shutdown(ctx); err != nil {
+		logger.Error("failed to shutdown tracer", "error", err)
+	}
 }

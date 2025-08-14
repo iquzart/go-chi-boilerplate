@@ -1,7 +1,7 @@
 package routes
 
 import (
-	controllers "go-chi-boilerplate/internal/adapter/api/controllers"
+	"go-chi-boilerplate/internal/adapters/primary/http/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -9,7 +9,7 @@ import (
 func AddApiRoutes(rg chi.Router) {
 	api := chi.NewRouter()
 
-	api.Get("/version", controllers.APIVersion)
+	api.Get("/version", handlers.APIVersion)
 
 	rg.Mount("/api", api)
 }

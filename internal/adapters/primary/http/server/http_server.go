@@ -2,8 +2,9 @@ package server
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/primary/http/router"
+	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
 	"go-chi-boilerplate/internal/config"
-	"go-chi-boilerplate/internal/router"
 	"log/slog"
 	"net/http"
 	"os"
@@ -18,8 +19,8 @@ type Server struct {
 }
 
 // New creates a Server with all dependencies injected
-func New(cfg *config.ServerConfigs, logger *slog.Logger) *Server {
-	r := router.SetupRouter(cfg.ServiceName, logger)
+func New(cfg *config.ServerConfigs, logger *slog.Logger, db *postgresql.PostgresDB) *Server {
+	r := router.SetupRouter(cfg.ServiceName, logger, db)
 
 	return &Server{
 		cfg:    cfg,

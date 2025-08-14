@@ -1,4 +1,4 @@
-package meta
+package middleware
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 // responseWriter captures status code
@@ -32,6 +34,12 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Skip /system/health if desired
+			if r.URL.Path == "/system/health" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			start := time.Now()
 			ww := &responseWriter{ResponseWriter: w}
 
@@ -39,11 +47,18 @@ func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 
 			duration := time.Since(start)
 
-			// capture caller file:line (no function)
-			_, file, line, ok := runtime.Caller(2) // 2 should be enough to point to handler; adjust if needed
+			// capture caller file:line
+			_, file, line, ok := runtime.Caller(2)
 			caller := "unknown"
 			if ok {
 				caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
+			}
+
+			// Extract trace ID from context
+			span := trace.SpanFromContext(r.Context())
+			traceID := ""
+			if span != nil && span.SpanContext().IsValid() {
+				traceID = span.SpanContext().TraceID().String()
 			}
 
 			logger.Info("http_request",
@@ -53,7 +68,8 @@ func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 				"duration_ms", duration.Milliseconds(),
 				"remote_addr", r.RemoteAddr,
 				"user_agent", r.UserAgent(),
-				"caller", caller, // file:line only; no function
+				"caller", caller,
+				"trace_id", traceID, // <-- added trace ID
 			)
 		})
 	}

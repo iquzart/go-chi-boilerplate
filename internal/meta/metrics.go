@@ -1,17 +1,15 @@
 package meta
 
 import (
-	"net/http"
+	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// MetricsMiddleware tracks HTTP requests
-func MetricsMiddleware(next http.Handler) http.Handler {
-	// Create metrics
-	httpRequestsTotal := prometheus.NewCounterVec(
+var (
+	// HTTP metrics
+	HTTPRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_requests_total",
 			Help: "Total number of HTTP requests",
@@ -19,7 +17,7 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 		[]string{"method", "path", "status"},
 	)
 
-	httpRequestDuration := prometheus.NewHistogramVec(
+	HTTPRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "http_request_duration_seconds",
 			Help:    "HTTP request duration in seconds",
@@ -28,35 +26,52 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 		[]string{"method", "path"},
 	)
 
-	// Register metrics
-	prometheus.MustRegister(httpRequestsTotal, httpRequestDuration)
+	// PostgreSQL database metrics
+	PostgresDBOpenConns = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "postgresql_db_open_connections",
+			Help: "Number of open connections to the PostgreSQL database",
+		},
+	)
+	PostgresDBIdleConns = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "postgresql_db_idle_connections",
+			Help: "Number of idle connections in the PostgreSQL pool",
+		},
+	)
+	PostgresDBMaxOpenConns = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "postgresql_db_max_open_connections",
+			Help: "Maximum allowed open connections to the PostgreSQL database",
+		},
+	)
+)
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		// Wrap ResponseWriter to capture status
-		ww := &statusRecorder{ResponseWriter: w, status: 200}
-		next.ServeHTTP(ww, r)
-
-		duration := time.Since(start).Seconds()
-
-		httpRequestsTotal.WithLabelValues(r.Method, r.URL.Path, http.StatusText(ww.status)).Inc()
-		httpRequestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
-	})
+// InitMetrics registers all metrics with Prometheus
+func InitMetrics() {
+	prometheus.MustRegister(HTTPRequestsTotal, HTTPRequestDuration)
 }
 
-// Status recorder to capture HTTP status codes
-type statusRecorder struct {
-	http.ResponseWriter
-	status int
-}
+// InitDBMetrics registers PostgreSQL metrics and updates them periodically
+func InitDBMetrics(db *postgresql.PostgresDB) {
+	prometheus.MustRegister(PostgresDBOpenConns, PostgresDBIdleConns, PostgresDBMaxOpenConns)
 
-func (rw *statusRecorder) WriteHeader(code int) {
-	rw.status = code
-	rw.ResponseWriter.WriteHeader(code)
-}
+	updateMetrics := func() {
+		stats := db.DB.Stats()
+		PostgresDBOpenConns.Set(float64(stats.OpenConnections))
+		PostgresDBIdleConns.Set(float64(stats.Idle))
+		PostgresDBMaxOpenConns.Set(float64(stats.MaxOpenConnections))
+	}
 
-// Handler to expose metrics
-func MetricsHandler() http.Handler {
-	return promhttp.Handler()
+	// Initial update
+	updateMetrics()
+
+	// Update periodically
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			updateMetrics()
+		}
+	}()
 }
