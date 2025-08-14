@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 )
 
 type ServerConfigs struct {
@@ -14,12 +16,15 @@ type ServerConfigs struct {
 }
 
 type DatabaseConfigs struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
+	Host         string
+	Port         string
+	User         string
+	Password     string
+	DBName       string
+	SSLMode      string
+	MaxOpenConns int
+	MaxIdleConns int
+	MaxLifetime  time.Duration
 }
 
 // AppConfigs holds all configs for the service
@@ -38,12 +43,15 @@ func GetAppConfigs() (*AppConfigs, error) {
 	}
 
 	dbCfg := &DatabaseConfigs{
-		Host:     getEnvOrDefault("DB_HOST", ""),
-		Port:     getEnvOrDefault("DB_PORT", "5432"),
-		User:     getEnvOrDefault("DB_USER", ""),
-		Password: getEnvOrDefault("DB_PASSWORD", ""),
-		DBName:   getEnvOrDefault("DB_NAME", ""),
-		SSLMode:  getEnvOrDefault("DB_SSLMODE", "disable"),
+		Host:         getEnvOrDefault("DB_HOST", ""),
+		Port:         getEnvOrDefault("DB_PORT", "5432"),
+		User:         getEnvOrDefault("DB_USER", ""),
+		Password:     getEnvOrDefault("DB_PASSWORD", ""),
+		DBName:       getEnvOrDefault("DB_NAME", ""),
+		SSLMode:      getEnvOrDefault("DB_SSLMODE", "disable"),
+		MaxOpenConns: getEnvOrDefaultInt("DB_MAX_OPEN_CONNS", 25),
+		MaxIdleConns: getEnvOrDefaultInt("DB_MAX_IDLE_CONNS", 25),
+		MaxLifetime:  getEnvOrDefaultDuration("DB_CONN_MAX_LIFETIME", 5*time.Minute),
 	}
 
 	if err := dbCfg.Validate(); err != nil {
@@ -71,4 +79,30 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// getEnvOrDefaultInt reads an int from env or returns a default
+func getEnvOrDefaultInt(key string, defaultValue int) int {
+	valStr := os.Getenv(key)
+	if valStr == "" {
+		return defaultValue
+	}
+	val, err := strconv.Atoi(valStr)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+// getEnvOrDefaultDuration reads a duration from env or returns a default
+func getEnvOrDefaultDuration(key string, defaultValue time.Duration) time.Duration {
+	valStr := os.Getenv(key)
+	if valStr == "" {
+		return defaultValue
+	}
+	val, err := time.ParseDuration(valStr)
+	if err != nil {
+		return defaultValue
+	}
+	return val
 }

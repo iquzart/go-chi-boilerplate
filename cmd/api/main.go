@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"go-chi-boilerplate/internal/adapters/primary/http/server"
+	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
 	"go-chi-boilerplate/internal/config"
 	"go-chi-boilerplate/internal/meta"
 	"log/slog"
@@ -41,8 +42,25 @@ func main() {
 	}
 	defer shutdownTracer(tp, logger)
 
+	// Connect to PostgreSQL
+	db, err := postgresql.New(cfg.Database, logger)
+	if err != nil {
+		meta.Fatal(logger, "failed to connect to database", "error", err)
+	}
+	defer db.Close()
+
+	// Initialize PostgreSQL metrics
+	meta.InitDBMetrics(db)
+
+	// Optional: run migrations
+	// if err := postgresql.RunMigrations(db, "./migrations"); err != nil {
+	//     meta.Fatal(logger, "failed to run migrations", "error", err)
+	// }
+
+	// Start HTTP server
+
 	// Start server
-	server.New(cfg.Server, logger).Run()
+	server.New(cfg.Server, logger, db).Run()
 }
 
 func shutdownTracer(tp interface{ Shutdown(context.Context) error }, logger *slog.Logger) {
