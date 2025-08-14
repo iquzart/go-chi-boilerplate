@@ -1,18 +1,15 @@
 name: Build and Test
 
 on:
-  # schedule:
-  #   - cron: '0 10 * * 0'
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
     paths-ignore:
-      - 'deployment/**'
-      - '.github/**'
+      - "deployment/**"
+      - ".github/**"
   pull_request:
-
 
 jobs:
   build:
@@ -20,22 +17,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.18'
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
 
-    - name: Install Dependencies
-      run: |
-        go mod download
+      - name: Install Dependencies
+        run: |
+          go mod download
 
-    - name: Build
-      run: |
-        go build -o app cmd/app/main.go
+      - name: Install swag CLI
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@latest
+          echo "$GOPATH/bin" >> $GITHUB_PATH
 
-    - name: Test
-      run: |
-        go test -v ./...
+      - name: Generate Swagger Docs
+        run: |
+          swag init -g cmd/api/main.go -o docs
+
+      - name: Build Go Binary
+        run: |
+          go build -ldflags="-s -w" -o app ./cmd/api
+
+      - name: Build Docker Image
+        run: |
+          docker build -t go-chi-app:latest .
+
+      - name: Test Docker Image
+        run: |
+          docker run --rm -d --name go-chi-app -p 8080:8080 go-chi-app:latest
+          sleep 5
+          curl -f http://localhost:8080/system/health
+          docker stop go-chi-app
