@@ -26,7 +26,7 @@ var (
 		[]string{"method", "path"},
 	)
 
-	// PostgreSQL database metrics (prefixed)
+	// PostgreSQL database metrics
 	PostgresDBOpenConns = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "postgresql_db_open_connections",
