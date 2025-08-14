@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/primary/http/router"
 	"go-chi-boilerplate/internal/config"
-	"go-chi-boilerplate/internal/router"
 	"log/slog"
 	"net/http"
 	"os"

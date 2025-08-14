@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/primary/http/server"
 	"go-chi-boilerplate/internal/config"
 	"go-chi-boilerplate/internal/meta"
-	"go-chi-boilerplate/internal/server"
 	"time"
 )
 
@@ -24,6 +24,8 @@ func main() {
 	cfg := config.GetServerConfigs()
 
 	logger := meta.NewLogger(cfg.LogLevel)
+
+	meta.InitMetrics()
 
 	tp, err := meta.InitTracer(cfg.ServiceName, cfg.OTLPEndpoint, logger)
 	if err != nil {

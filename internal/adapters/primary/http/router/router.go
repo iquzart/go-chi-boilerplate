@@ -1,8 +1,8 @@
 package router
 
 import (
-	"go-chi-boilerplate/internal/adapter/api/routes"
-	"go-chi-boilerplate/internal/meta"
+	custom "go-chi-boilerplate/internal/adapters/primary/http/middleware"
+	"go-chi-boilerplate/internal/adapters/primary/http/routes"
 	"log/slog"
 
 	"github.com/go-chi/chi/v5"
@@ -15,9 +15,9 @@ func SetupRouter(serviceName string, logger *slog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(otelhttp.NewMiddleware(serviceName))
-	r.Use(meta.LoggingMiddleware(logger))
-	r.Use(meta.MetricsMiddleware)
+	r.Use(custom.LoggingMiddleware(logger))
 	r.Use(middleware.Recoverer)
+	r.Use(custom.MetricsMiddleware)
 
 	registerRoutes(r)
 	return r
