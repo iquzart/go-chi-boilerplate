@@ -26,23 +26,23 @@ var (
 		[]string{"method", "path"},
 	)
 
-	// Database metrics
-	DBOpenConns = prometheus.NewGauge(
+	// PostgreSQL database metrics (prefixed)
+	PostgresDBOpenConns = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "db_open_connections",
-			Help: "Number of open connections to the database",
+			Name: "postgresql_db_open_connections",
+			Help: "Number of open connections to the PostgreSQL database",
 		},
 	)
-	DBIdleConns = prometheus.NewGauge(
+	PostgresDBIdleConns = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "db_idle_connections",
-			Help: "Number of idle connections in the database pool",
+			Name: "postgresql_db_idle_connections",
+			Help: "Number of idle connections in the PostgreSQL pool",
 		},
 	)
-	DBMaxOpenConns = prometheus.NewGauge(
+	PostgresDBMaxOpenConns = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "db_max_open_connections",
-			Help: "Maximum allowed open connections to the database",
+			Name: "postgresql_db_max_open_connections",
+			Help: "Maximum allowed open connections to the PostgreSQL database",
 		},
 	)
 )
@@ -52,23 +52,23 @@ func InitMetrics() {
 	prometheus.MustRegister(HTTPRequestsTotal, HTTPRequestDuration)
 }
 
-// InitDBMetrics registers database metrics and updates them periodically
+// InitDBMetrics registers PostgreSQL metrics and updates them periodically
 func InitDBMetrics(db *postgresql.PostgresDB) {
-	prometheus.MustRegister(DBOpenConns, DBIdleConns, DBMaxOpenConns)
+	prometheus.MustRegister(PostgresDBOpenConns, PostgresDBIdleConns, PostgresDBMaxOpenConns)
 
 	updateMetrics := func() {
 		stats := db.DB.Stats()
-		DBOpenConns.Set(float64(stats.OpenConnections))
-		DBIdleConns.Set(float64(stats.Idle))
-		DBMaxOpenConns.Set(float64(stats.MaxOpenConnections))
+		PostgresDBOpenConns.Set(float64(stats.OpenConnections))
+		PostgresDBIdleConns.Set(float64(stats.Idle))
+		PostgresDBMaxOpenConns.Set(float64(stats.MaxOpenConnections))
 	}
 
-	// Update metrics immediately
+	// Initial update
 	updateMetrics()
 
 	// Update periodically
 	go func() {
-		ticker := time.NewTicker(10 * time.Second) // adjust interval as needed
+		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
 			updateMetrics()
