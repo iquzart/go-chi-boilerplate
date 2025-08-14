@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t go-chi-app:latest .
+          docker build -t go-chi-app:latest -f Containerfile .
 
       - name: Test Docker Image
         run: |
