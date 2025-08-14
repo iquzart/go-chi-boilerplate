@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
-.PHONY: help clean build run docker-build docker-run docker-stop
+.PHONY: help clean build run docker-build docker-run docker-stop compose-up compose-down
 
 # Define variables
-BINARY_NAME := go-chi-boilerplate
-DOCKER_IMAGE := make-go-chi-boilerplate
-DOCKER_CONTAINER := make-go-chi-boilerplate
+BINARY_NAME := chi-boilerplate
+DOCKER_IMAGE := chi-boilerplate
+DOCKER_CONTAINER := chi-boilerplate
 MAIN_FILE := cmd/api/main.go
 LDFLAGS := -ldflags="-s -w"
 
@@ -23,8 +23,8 @@ clean: ## Remove binary file and container resources
 build: ## Build the binary file
 	go build $(LDFLAGS) -o $(BINARY_NAME) $(MAIN_FILE)
 
-run: ## Build and run the binary file
-	swag init -g cmd/api/main.go -o docs;
+run: ## Build and run the binary file locally
+	swag init -g cmd/api/main.go -o docs
 	go run $(LDFLAGS) $(MAIN_FILE)
 
 docker-build: ## Build Docker image
@@ -36,6 +36,13 @@ docker-run: ## Run Docker container
 	fi
 	docker run -d -p 8080:8080 --name $(DOCKER_CONTAINER) $(DOCKER_IMAGE)
 
-
 docker-stop: ## Stop Docker container
-	docker stop $(DOCKER_CONTAINER)
+	docker stop $(DOCKER_CONTAINER) || true
+	docker rm $(DOCKER_CONTAINER) || true
+
+compose-up: ## Start services using docker-compose
+	docker-compose up -d --build
+
+compose-down: ## Stop services using docker-compose
+	docker-compose down
+
