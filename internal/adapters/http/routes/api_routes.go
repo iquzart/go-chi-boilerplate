@@ -19,7 +19,7 @@ func AddAPIRoutes(rg chi.Router, db *postgresql.PostgresDB, logger *slog.Logger,
 	userUsecase := user.NewUserUsecase(userRepo)
 
 	jwtService := services.NewJWTService(jwtSecret)
-	authUsecase := auth.NewAuthUsecase(userRepo, jwtService)
+	authUsecase := auth.NewAuthUsecase(userRepo, jwtService, logger)
 
 	api := chi.NewRouter()
 
