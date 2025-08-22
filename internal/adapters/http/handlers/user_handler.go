@@ -56,7 +56,11 @@ func CreateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 
 		created, err := uc.CreateUser(entity)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			if err.Error() == "email already exists" {
+				w.WriteHeader(http.StatusBadRequest) // client error
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return
 		}

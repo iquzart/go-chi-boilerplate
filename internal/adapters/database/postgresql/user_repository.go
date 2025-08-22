@@ -1,10 +1,10 @@
 package postgresql
 
 import (
-	"go-chi-boilerplate/internal/core/entities"
-	"go-chi-boilerplate/internal/core/repositories"
 	"database/sql"
 	"errors"
+	"go-chi-boilerplate/internal/core/entities"
+	"go-chi-boilerplate/internal/core/repositories"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -149,4 +149,14 @@ func (r *userRepository) GetByEmail(email string) (*entities.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// ExistsByEmail checks if a user with the given email already exists
+func (r *userRepository) ExistsByEmail(email string) (bool, error) {
+	var count int
+	err := r.db.QueryRow("SELECT COUNT(1) FROM users WHERE email = $1", email).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
