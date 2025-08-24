@@ -33,7 +33,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "authentication"
                 ],
                 "summary": "User login",
                 "parameters": [
@@ -87,7 +87,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "profile"
+                    "userProfile"
                 ],
                 "summary": "Get current user profile",
                 "responses": {
@@ -124,7 +124,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "List users",
                 "parameters": [
@@ -173,7 +173,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
@@ -230,7 +230,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Get user by ID",
                 "parameters": [
@@ -283,7 +283,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Update user",
                 "parameters": [
@@ -354,7 +354,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Delete user",
                 "parameters": [
@@ -406,7 +406,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Change user status",
                 "parameters": [
@@ -471,7 +471,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "api"
+                    "version"
                 ],
                 "summary": "Get API version",
                 "responses": {

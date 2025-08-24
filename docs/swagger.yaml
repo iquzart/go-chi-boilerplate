@@ -158,7 +158,7 @@ paths:
             type: object
       summary: User login
       tags:
-      - auth
+      - authentication
   /api/v1/profile:
     get:
       description: Returns the profile of the currently authenticated user
@@ -179,7 +179,7 @@ paths:
       - BearerAuth: []
       summary: Get current user profile
       tags:
-      - profile
+      - userProfile
   /api/v1/users:
     get:
       consumes:
@@ -211,7 +211,7 @@ paths:
       - BearerAuth: []
       summary: List users
       tags:
-      - users
+      - userManagement
     post:
       consumes:
       - application/json
@@ -247,7 +247,7 @@ paths:
       - BearerAuth: []
       summary: Create a new user
       tags:
-      - users
+      - userManagement
   /api/v1/users/{id}:
     delete:
       consumes:
@@ -280,7 +280,7 @@ paths:
       - BearerAuth: []
       summary: Delete user
       tags:
-      - users
+      - userManagement
     get:
       consumes:
       - application/json
@@ -314,7 +314,7 @@ paths:
       - BearerAuth: []
       summary: Get user by ID
       tags:
-      - users
+      - userManagement
     put:
       consumes:
       - application/json
@@ -360,7 +360,7 @@ paths:
       - BearerAuth: []
       summary: Update user
       tags:
-      - users
+      - userManagement
   /api/v1/users/{id}/status:
     patch:
       consumes:
@@ -407,7 +407,7 @@ paths:
       - BearerAuth: []
       summary: Change user status
       tags:
-      - users
+      - userManagement
   /api/version:
     get:
       description: Returns the current version of the API in JSON format
@@ -422,7 +422,7 @@ paths:
             type: object
       summary: Get API version
       tags:
-      - api
+      - version
   /system/health:
     get:
       consumes:

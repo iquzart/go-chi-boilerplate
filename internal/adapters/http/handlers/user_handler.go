@@ -13,7 +13,7 @@ import (
 // CreateUserHandler godoc
 // @Summary      Create a new user
 // @Description  Create a new user with first name, last name, email, role, and password. Role must be one of: admin, user, maker, checker
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -85,7 +85,7 @@ func CreateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 // ListUsersHandler godoc
 // @Summary      List users
 // @Description  Get a paginated list of users
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -131,7 +131,7 @@ func ListUsersHandler(uc *user.UserUsecase) http.HandlerFunc {
 // GetUserHandler godoc
 // @Summary      Get user by ID
 // @Description  Get a single user by ID
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -169,7 +169,7 @@ func GetUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 // UpdateUserHandler godoc
 // @Summary      Update user
 // @Description  Update user fields (role must be one of: admin, user, maker, checker)
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -248,7 +248,7 @@ func UpdateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 // ChangeUserStatusHandler godoc
 // @Summary      Change user status
 // @Description  Activate or deactivate a user
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
@@ -302,7 +302,7 @@ func ChangeUserStatusHandler(uc *user.UserUsecase) http.HandlerFunc {
 // DeleteUserHandler godoc
 // @Summary      Delete user
 // @Description  Delete a user by ID
-// @Tags         users
+// @Tags         userManagement
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth

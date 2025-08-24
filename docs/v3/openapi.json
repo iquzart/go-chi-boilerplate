@@ -19,7 +19,7 @@
             "post": {
                 "description": "Login with email and password to get JWT token",
                 "tags": [
-                    "auth"
+                    "authentication"
                 ],
                 "summary": "User login",
                 "requestBody": {
@@ -82,7 +82,7 @@
                 ],
                 "description": "Returns the profile of the currently authenticated user",
                 "tags": [
-                    "profile"
+                    "userProfile"
                 ],
                 "summary": "Get current user profile",
                 "responses": {
@@ -121,7 +121,7 @@
                 ],
                 "description": "Get a paginated list of users",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "List users",
                 "parameters": [
@@ -176,7 +176,7 @@
                 ],
                 "description": "Create a new user with first name, last name, email, role, and password. Role must be one of: admin, user, maker, checker",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Create a new user",
                 "requestBody": {
@@ -239,7 +239,7 @@
                 ],
                 "description": "Get a single user by ID",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Get user by ID",
                 "parameters": [
@@ -300,7 +300,7 @@
                 ],
                 "description": "Update user fields (role must be one of: admin, user, maker, checker)",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Update user",
                 "parameters": [
@@ -385,7 +385,7 @@
                 ],
                 "description": "Delete a user by ID",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Delete user",
                 "parameters": [
@@ -441,7 +441,7 @@
                 ],
                 "description": "Activate or deactivate a user",
                 "tags": [
-                    "users"
+                    "userManagement"
                 ],
                 "summary": "Change user status",
                 "parameters": [
@@ -523,7 +523,7 @@
             "get": {
                 "description": "Returns the current version of the API in JSON format",
                 "tags": [
-                    "api"
+                    "version"
                 ],
                 "summary": "Get API version",
                 "responses": {

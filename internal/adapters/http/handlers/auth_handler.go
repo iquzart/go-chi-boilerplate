@@ -10,7 +10,7 @@ import (
 // LoginHandler godoc
 // @Summary      User login
 // @Description  Login with email and password to get JWT token
-// @Tags         auth
+// @Tags         authentication
 // @Accept       json
 // @Produce      json
 // @Param        login body dto.LoginRequest true "Login info"

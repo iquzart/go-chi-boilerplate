@@ -13,7 +13,7 @@ import (
 // GetProfile godoc
 // @Summary      Get current user profile
 // @Description  Returns the profile of the currently authenticated user
-// @Tags         profile
+// @Tags         userProfile
 // @Security     BearerAuth
 // @Produce      json
 // @Success      200 {object} dto.ProfileResponse

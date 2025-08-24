@@ -9,7 +9,7 @@ import (
 // APIVersion returns the current API version
 // @Summary Get API version
 // @Description Returns the current version of the API in JSON format
-// @Tags api
+// @Tags version
 // @Produce json
 // @Success 200 {object} map[string]string "API version"
 // @Router /api/version [get]
