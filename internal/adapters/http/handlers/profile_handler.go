@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"go-chi-boilerplate/internal/adapters/http/dto"
 	"go-chi-boilerplate/internal/app/usecases/user"
 	"net/http"
@@ -22,10 +21,6 @@ import (
 func GetProfile(userUC *user.UserUsecase) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, claims, _ := jwtauth.FromContext(r.Context())
-
-		// temp
-		claimsJSON, _ := json.Marshal(claims)
-		fmt.Println("JWT Claims:", string(claimsJSON))
 
 		userID, ok := claims["sub"].(string)
 		if !ok || userID == "" {
