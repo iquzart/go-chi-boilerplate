@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"go-chi-boilerplate/internal/core/entities"
 	"go-chi-boilerplate/internal/core/repositories"
@@ -16,9 +17,9 @@ func NewUserUsecase(repo repositories.UserRepository) *UserUsecase {
 	return &UserUsecase{repo: repo}
 }
 
-func (u *UserUsecase) CreateUser(user *entities.User) (*entities.User, error) {
+func (u *UserUsecase) CreateUser(ctx context.Context, user *entities.User) (*entities.User, error) {
 	// Check if email exists
-	exists, err := u.repo.ExistsByEmail(user.Email)
+	exists, err := u.repo.ExistsByEmail(ctx, user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -32,37 +33,37 @@ func (u *UserUsecase) CreateUser(user *entities.User) (*entities.User, error) {
 		return nil, err
 	}
 	user.Password = string(hashed)
-	return u.repo.Create(user)
+	return u.repo.Create(ctx, user)
 }
 
-func (u *UserUsecase) UpdateUser(user *entities.User) (*entities.User, error) {
-	exists, err := u.repo.ExistsByEmail(user.Email)
+func (u *UserUsecase) UpdateUser(ctx context.Context, user *entities.User) (*entities.User, error) {
+	exists, err := u.repo.ExistsByEmail(ctx, user.Email)
 	if err != nil {
 		return nil, err
 	}
 	if exists {
 		// If the existing user has a different ID, prevent update
-		existingUser, _ := u.repo.GetByEmail(user.Email)
+		existingUser, _ := u.repo.GetByEmail(ctx, user.Email)
 		if existingUser.ID != user.ID {
 			return nil, errors.New("email already exists")
 		}
 	}
 
-	return u.repo.Update(user)
+	return u.repo.Update(ctx, user)
 }
 
-func (u *UserUsecase) GetUserByID(id string) (*entities.User, error) {
-	return u.repo.GetByID(id)
+func (u *UserUsecase) GetUserByID(ctx context.Context, id string) (*entities.User, error) {
+	return u.repo.GetByID(ctx, id)
 }
 
-func (u *UserUsecase) ListUsers(offset, limit int) ([]*entities.User, int, error) {
-	return u.repo.List(offset, limit)
+func (u *UserUsecase) ListUsers(ctx context.Context, offset, limit int) ([]*entities.User, int, error) {
+	return u.repo.List(ctx, offset, limit)
 }
 
-func (u *UserUsecase) ChangeStatus(id string, status string) (*entities.User, error) {
-	return u.repo.UpdateStatus(id, status)
+func (u *UserUsecase) ChangeStatus(ctx context.Context, id string, status string) (*entities.User, error) {
+	return u.repo.UpdateStatus(ctx, id, status)
 }
 
-func (u *UserUsecase) DeleteUser(id string) error {
-	return u.repo.Delete(id)
+func (u *UserUsecase) DeleteUser(ctx context.Context, id string) error {
+	return u.repo.Delete(ctx, id)
 }

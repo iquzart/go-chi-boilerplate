@@ -32,8 +32,8 @@ func NewAuthUsecase(userRepo repositories.UserRepository, jwtService *services.J
 	}
 }
 
-func (a *AuthUsecase) Login(email, password, ip string) (string, string, error) {
-	user, err := a.UserRepo.GetByEmail(email)
+func (a *AuthUsecase) Login(ctx context.Context, email, password, ip string) (string, string, error) {
+	user, err := a.UserRepo.GetByEmail(ctx, email)
 	if err != nil {
 		meta.AuthEvent(a.Logger, "login_failed", "", email, "", ip, "invalid credentials")
 		return "", "", errors.New("invalid credentials")
@@ -56,8 +56,7 @@ func (a *AuthUsecase) Login(email, password, ip string) (string, string, error) 
 		return "", "", errors.New("failed to generate refresh token")
 	}
 
-	// Corrected call to SaveRefreshToken
-	if err := a.RefreshRepo.SaveRefreshToken(context.Background(), user.ID, refreshToken, time.Now().Add(a.TTL)); err != nil {
+	if err := a.RefreshRepo.SaveRefreshToken(ctx, user.ID, refreshToken, time.Now().Add(a.TTL)); err != nil {
 		meta.AuthEvent(a.Logger, "login_failed", user.ID, email, user.Role, ip, "saving refresh token failed")
 		return "", "", errors.New("failed to save refresh token")
 	}
@@ -73,7 +72,7 @@ func (a *AuthUsecase) RefreshAccessToken(ctx context.Context, userID, token stri
 		return "", errors.New("invalid or expired refresh token")
 	}
 
-	user, err := a.UserRepo.GetByID(userID)
+	user, err := a.UserRepo.GetByID(ctx, userID)
 	if err != nil {
 		return "", errors.New("user not found")
 	}
@@ -89,15 +88,21 @@ func (a *AuthUsecase) RefreshAccessToken(ctx context.Context, userID, token stri
 
 // Logout removes the refresh token from the repository
 func (a *AuthUsecase) Logout(ctx context.Context, userID string, ip string) error {
-	user, _ := a.UserRepo.GetByID(userID)
-	meta.AuthEvent(a.Logger, "logout_success", userID, user.Email, user.Role, ip, "user logged out")
-
-	err := a.RefreshRepo.DeleteRefreshToken(context.Background(), userID)
+	user, err := a.UserRepo.GetByID(ctx, userID)
 	if err != nil {
-		// Log an error if the deletion fails
-		meta.AuthEvent(a.Logger, "logout_failed", userID, "", "", "", "failed to delete refresh token")
-		return err
+		// Log the error but continue to attempt to delete the token
+		a.Logger.Error("failed to get user for logout event", "error", err, "user_id", userID)
 	}
 
+	// Log the logout event before deleting the token
+	// This uses the user details retrieved above
+	meta.AuthEvent(a.Logger, "logout_success", userID, user.Email, user.Role, ip, "user logged out")
+
+	err = a.RefreshRepo.DeleteRefreshToken(ctx, userID)
+	if err != nil {
+		// Log an error if the deletion fails
+		meta.AuthEvent(a.Logger, "logout_failed", userID, user.Email, user.Role, ip, "failed to delete refresh token")
+		return err
+	}
 	return nil
 }

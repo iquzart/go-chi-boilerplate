@@ -33,7 +33,8 @@ func GetProfile(userUC *user.UserUsecase) http.HandlerFunc {
 			return
 		}
 
-		user, err := userUC.GetUserByID(userID)
+		// Pass the context from the request
+		user, err := userUC.GetUserByID(r.Context(), userID)
 		if err != nil {
 			http.Error(w, `{"error":"user not found"}`, http.StatusNotFound)
 			return

@@ -38,7 +38,6 @@ func CreateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 			return
 		}
 
-		// Validate role
 		if !validRoles[req.Role] {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]string{"error": "invalid role, must be one of: admin, user, maker, checker"})
@@ -54,10 +53,11 @@ func CreateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 			Status:    "active",
 		}
 
-		created, err := uc.CreateUser(entity)
+		// Pass the context from the request
+		created, err := uc.CreateUser(r.Context(), entity)
 		if err != nil {
 			if err.Error() == "email already exists" {
-				w.WriteHeader(http.StatusBadRequest) // client error
+				w.WriteHeader(http.StatusBadRequest)
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
@@ -99,7 +99,8 @@ func ListUsersHandler(uc *user.UserUsecase) http.HandlerFunc {
 		offset := 0
 		limit := 10
 
-		users, total, err := uc.ListUsers(offset, limit)
+		// Pass the context from the request
+		users, total, err := uc.ListUsers(r.Context(), offset, limit)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -143,7 +144,9 @@ func ListUsersHandler(uc *user.UserUsecase) http.HandlerFunc {
 func GetUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		user, err := uc.GetUserByID(id)
+
+		// Pass the context from the request
+		user, err := uc.GetUserByID(r.Context(), id)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -197,7 +200,8 @@ func UpdateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 			return
 		}
 
-		userEntity, err := uc.GetUserByID(id)
+		// Pass the context from the request
+		userEntity, err := uc.GetUserByID(r.Context(), id)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": "user not found"})
@@ -222,7 +226,8 @@ func UpdateUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 			userEntity.Role = *req.Role
 		}
 
-		updated, err := uc.UpdateUser(userEntity)
+		// Pass the context from the request
+		updated, err := uc.UpdateUser(r.Context(), userEntity)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -269,14 +274,14 @@ func ChangeUserStatusHandler(uc *user.UserUsecase) http.HandlerFunc {
 			return
 		}
 
-		// Validate status explicitly
 		if req.Status != "active" && req.Status != "inactive" {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]string{"error": "status must be 'active' or 'inactive'"})
 			return
 		}
 
-		updated, err := uc.ChangeStatus(id, req.Status)
+		// Pass the context from the request
+		updated, err := uc.ChangeStatus(r.Context(), id, req.Status)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -314,7 +319,9 @@ func ChangeUserStatusHandler(uc *user.UserUsecase) http.HandlerFunc {
 func DeleteUserHandler(uc *user.UserUsecase) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		if err := uc.DeleteUser(id); err != nil {
+
+		// Pass the context from the request
+		if err := uc.DeleteUser(r.Context(), id); err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return

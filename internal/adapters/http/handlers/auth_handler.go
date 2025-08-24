@@ -27,8 +27,12 @@ func LoginHandler(authUC *auth.AuthUsecase) http.HandlerFunc {
 			return
 		}
 
+		// Get the context from the request
+		ctx := r.Context()
 		ip := r.RemoteAddr
-		accessToken, refreshToken, err := authUC.Login(req.Email, req.Password, ip)
+
+		// Pass the context to the use case
+		accessToken, refreshToken, err := authUC.Login(ctx, req.Email, req.Password, ip)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -93,8 +97,13 @@ func LogoutHandler(authUC *auth.AuthUsecase) http.HandlerFunc {
 		}
 		json.NewDecoder(r.Body).Decode(&req)
 
+		// Get the context from the request
+		ctx := r.Context()
+
 		ip := r.RemoteAddr
-		if err := authUC.Logout(r.Context(), req.UserID, ip); err != nil {
+
+		// Pass the context to the use case.
+		if err := authUC.Logout(ctx, req.UserID, ip); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return

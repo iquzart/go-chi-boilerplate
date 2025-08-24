@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -22,6 +23,12 @@ func New(cfg *config.RedisConfigs, logger *slog.Logger) (*RedisDB, error) {
 		Password: cfg.Password,
 		DB:       cfg.DB,
 	})
+
+	// Add the OpenTelemetry hook from the new package
+	if err := redisotel.InstrumentTracing(rdb); err != nil {
+		logger.Error("failed to instrument Redis with OpenTelemetry", "error", err)
+		return nil, err
+	}
 
 	// Use a short timeout for ping to avoid blocking startup
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)

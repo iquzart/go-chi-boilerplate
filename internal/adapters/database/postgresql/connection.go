@@ -1,14 +1,16 @@
 package postgresql
 
 import (
-	"go-chi-boilerplate/internal/config"
 	"context"
 	"database/sql"
 	"fmt"
+	"go-chi-boilerplate/internal/config"
 	"log/slog"
 	"time"
 
+	"github.com/XSAM/otelsql"
 	_ "github.com/lib/pq"
+	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
 type PostgresDB struct {
@@ -16,14 +18,21 @@ type PostgresDB struct {
 	Logger *slog.Logger
 }
 
-// New creates a new PostgreSQL connection
+// New creates a new PostgreSQL connection with OpenTelemetry tracing
 func New(cfg *config.DatabaseConfigs, logger *slog.Logger) (*PostgresDB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
 	)
 
-	db, err := sql.Open("postgres", dsn)
+	// Open the connection with OpenTelemetry instrumentation
+	db, err := otelsql.Open("postgres", dsn,
+		otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+			semconv.DBName(cfg.DBName),
+			semconv.DBUser(cfg.User),
+		),
+	)
 	if err != nil {
 		logger.Error("failed to open database connection",
 			"host", cfg.Host, "db", cfg.DBName, "error", err,
