@@ -15,3 +15,14 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- faster lookups by email
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- Insert the admin user with a hashed password
+INSERT INTO users (first_name, last_name, email, role, password, status)
+VALUES (
+    'Admin',
+    'User',
+    'admin@admin.com',
+    'admin',
+    '$2a$12$q3t4nJVrzQeU8XzaeJyVxOyFcVqhjUKapyl234VYjk7rJfvc8sENq', -- Hashed password for 'P@ssw0rd'
+    'active'
+);

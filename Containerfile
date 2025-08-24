@@ -1,10 +1,11 @@
 FROM golang:1.23-alpine3.20 AS build-env
 
-RUN apk add --no-cache git ca-certificates && update-ca-certificates
+RUN apk add --no-cache git ca-certificates nodejs npm
 
 ENV GOPROXY=https://proxy.golang.org,direct \
   GOSUMDB=off \
-  GO111MODULE=on
+  GO111MODULE=on \
+  PATH=/usr/local/lib/node_modules/.bin:$PATH
 
 WORKDIR /src
 
@@ -12,11 +13,13 @@ COPY go.mod go.sum ./
 
 RUN go mod download && go mod verify
 
-RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/swaggo/swag/cmd/swag@latest && \
+  npm install -g swagger2openapi
 
 COPY . .
 
-RUN swag init -g cmd/api/main.go -o docs && \
+RUN swag init -g cmd/api/main.go --output docs && \
+  swagger2openapi -o docs/openapi.json docs/swagger.json && \
   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
   -ldflags="-s -w -extldflags '-static'" \
   -a -installsuffix cgo \
@@ -25,7 +28,6 @@ RUN swag init -g cmd/api/main.go -o docs && \
 FROM scratch
 
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
 COPY --from=build-env /src/app /app
 COPY --from=build-env /src/docs /docs
 COPY --from=build-env /src/migrations /migrations
