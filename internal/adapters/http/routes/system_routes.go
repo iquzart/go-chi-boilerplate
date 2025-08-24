@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"go-chi-boilerplate/internal/adapters/cache/redis"
 	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	"go-chi-boilerplate/internal/adapters/http/handlers"
 	"net/http"
@@ -10,12 +11,12 @@ import (
 	_ "go-chi-boilerplate/docs"
 )
 
-func AddSystemRoutes(r chi.Router, db *postgresql.PostgresDB) {
+func AddSystemRoutes(r chi.Router, db *postgresql.PostgresDB, redisDB *redis.RedisDB) {
 	system := chi.NewRouter()
 
 	system.Get("/health", handlers.Health)
 	system.Get("/liveness", handlers.Liveness)
-	system.Get("/readiness", handlers.Readiness(db))
+	system.Get("/readiness", handlers.Readiness(db, redisDB))
 
 	system.Handle("/metrics", handlers.MetricsHandler())
 

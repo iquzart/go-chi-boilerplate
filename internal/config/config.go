@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,10 +29,18 @@ type DatabaseConfigs struct {
 	MaxLifetime  time.Duration
 }
 
+type RedisConfigs struct {
+	Addr     string
+	Password string
+	DB       int
+	Prefix   string
+}
+
 // AppConfigs holds all configs for the service
 type AppConfigs struct {
 	Server   *ServerConfigs
 	Database *DatabaseConfigs
+	Redis    *RedisConfigs
 }
 
 // GetAppConfigs loads all configs (server + db) and validates them
@@ -60,16 +69,64 @@ func GetAppConfigs() (*AppConfigs, error) {
 		return nil, err
 	}
 
+	redisCfg := &RedisConfigs{
+		Addr:     getEnvOrDefault("REDIS_ADDR", "redis:6379"),
+		Password: getEnvOrDefault("REDIS_PASSWORD", ""),
+		DB:       getEnvOrDefaultInt("REDIS_DB", 0),
+		Prefix:   getEnvOrDefault("REDIS_PREFIX", "go-chi-boilerplate:"),
+	}
+
+	if err := redisCfg.Validate(); err != nil {
+		return nil, err
+	}
+
 	return &AppConfigs{
 		Server:   serverCfg,
 		Database: dbCfg,
+		Redis:    redisCfg,
 	}, nil
 }
 
 // Validate checks if required DB configs are present
 func (d *DatabaseConfigs) Validate() error {
-	if d.Host == "" || d.User == "" || d.Password == "" || d.DBName == "" {
-		return errors.New("database configuration is incomplete: DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME are required")
+	missing := []string{}
+
+	if d.Host == "" {
+		missing = append(missing, "DB_HOST")
+	}
+	if d.User == "" {
+		missing = append(missing, "DB_USER")
+	}
+	if d.Password == "" {
+		missing = append(missing, "DB_PASSWORD")
+	}
+	if d.DBName == "" {
+		missing = append(missing, "DB_NAME")
+	}
+
+	if len(missing) > 0 {
+		return errors.New("database configuration is incomplete, missing: " + strings.Join(missing, ", "))
+	}
+	return nil
+}
+
+// Validate checks if required Redis configs are present
+func (r *RedisConfigs) Validate() error {
+	var missing []string
+
+	if r.Addr == "" {
+		missing = append(missing, "REDIS_ADDR")
+	}
+	if r.Password == "" {
+		missing = append(missing, "REDIS_PASSWORD")
+	}
+	if r.Prefix == "" {
+		missing = append(missing, "REDIS_PREFIX")
+	}
+	// DB can default to 0 → no validation
+
+	if len(missing) > 0 {
+		return errors.New("redis configuration is incomplete, missing: " + strings.Join(missing, ", "))
 	}
 	return nil
 }

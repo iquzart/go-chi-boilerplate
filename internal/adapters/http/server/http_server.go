@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/cache/redis"
 	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	"go-chi-boilerplate/internal/adapters/http/router"
 	"go-chi-boilerplate/internal/config"
@@ -19,8 +20,8 @@ type Server struct {
 }
 
 // New creates a Server with all dependencies injected
-func New(cfg *config.ServerConfigs, logger *slog.Logger, db *postgresql.PostgresDB) *Server {
-	r := router.SetupRouter(cfg.ServiceName, logger, db, cfg.JWTSecret)
+func New(cfg *config.ServerConfigs, logger *slog.Logger, db *postgresql.PostgresDB, redisDB *redis.RedisDB) *Server {
+	r := router.SetupRouter(cfg.ServiceName, logger, db, redisDB, cfg.JWTSecret)
 
 	return &Server{
 		cfg:    cfg,

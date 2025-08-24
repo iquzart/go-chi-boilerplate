@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"go-chi-boilerplate/internal/adapters/cache/redis"
 	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	"go-chi-boilerplate/internal/adapters/http/server"
 	"go-chi-boilerplate/internal/config"
@@ -58,13 +59,20 @@ func main() {
 	// Initialize PostgreSQL metrics
 	meta.InitDBMetrics(db)
 
+	// Connect to Redis
+	redisDB, err := redis.New(cfg.Redis, logger)
+	if err != nil {
+		meta.Fatal(logger, "failed to connect to Redis", "error", err)
+	}
+	defer redisDB.Close()
+
 	// Optional: run migrations
 	if err := postgresql.RunMigrations(db, "./migrations", logger); err != nil {
 		meta.Fatal(logger, "failed to run migrations", "error", err)
 	}
 
 	// Start server
-	server.New(cfg.Server, logger, db).Run()
+	server.New(cfg.Server, logger, db, redisDB).Run()
 }
 
 func shutdownTracer(tp interface{ Shutdown(context.Context) error }, logger *slog.Logger) {

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"go-chi-boilerplate/internal/adapters/cache/redis"
 	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	custom "go-chi-boilerplate/internal/adapters/http/middleware"
 	"go-chi-boilerplate/internal/adapters/http/routes"
@@ -12,7 +13,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-func SetupRouter(serviceName string, logger *slog.Logger, db *postgresql.PostgresDB, jwtSecret string) *chi.Mux {
+func SetupRouter(serviceName string, logger *slog.Logger, db *postgresql.PostgresDB, redisDB *redis.RedisDB, jwtSecret string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(otelhttp.NewMiddleware(serviceName))
@@ -20,11 +21,11 @@ func SetupRouter(serviceName string, logger *slog.Logger, db *postgresql.Postgre
 	r.Use(middleware.Recoverer)
 	r.Use(custom.MetricsMiddleware)
 
-	registerRoutes(r, db, logger, jwtSecret)
+	registerRoutes(r, db, logger, jwtSecret, redisDB)
 	return r
 }
 
-func registerRoutes(r chi.Router, db *postgresql.PostgresDB, logger *slog.Logger, jwtSecret string) {
-	routes.AddSystemRoutes(r, db)
+func registerRoutes(r chi.Router, db *postgresql.PostgresDB, logger *slog.Logger, jwtSecret string, redisDB *redis.RedisDB) {
+	routes.AddSystemRoutes(r, db, redisDB)
 	routes.AddAPIRoutes(r, db, logger, jwtSecret)
 }
