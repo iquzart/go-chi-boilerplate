@@ -20,10 +20,12 @@ services:
       - DB_NAME=appdb
       - DB_SSLMODE=disable
       # Redis connection
-      - REDIS_ADDR=redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=redis!password123
       - REDIS_DB=0
       - REDIS_PREFIX=go-chi-boilerplate
+      - REDIS_TTL=1h # supports values like 15m, 1h
     depends_on:
       - postgres
       - redis

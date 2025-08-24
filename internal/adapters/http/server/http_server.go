@@ -20,14 +20,14 @@ type Server struct {
 }
 
 // New creates a Server with all dependencies injected
-func New(cfg *config.ServerConfigs, logger *slog.Logger, db *postgresql.PostgresDB, redisDB *redis.RedisDB) *Server {
-	r := router.SetupRouter(cfg.ServiceName, logger, db, redisDB, cfg.JWTSecret)
+func New(cfg *config.AppConfigs, logger *slog.Logger, db *postgresql.PostgresDB, redisDB *redis.RedisDB) *Server {
+	r := router.SetupRouter(cfg, logger, db, redisDB)
 
 	return &Server{
-		cfg:    cfg,
+		cfg:    cfg.Server,
 		logger: logger,
 		http: &http.Server{
-			Addr:    cfg.Port,
+			Addr:    cfg.Server.Port,
 			Handler: r,
 		},
 	}

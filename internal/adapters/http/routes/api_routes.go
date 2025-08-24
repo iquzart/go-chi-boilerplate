@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"go-chi-boilerplate/internal/adapters/cache/redis"
 	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	"go-chi-boilerplate/internal/adapters/http/handlers"
 	"go-chi-boilerplate/internal/app/usecases/auth"
 	"go-chi-boilerplate/internal/app/usecases/user"
+	"go-chi-boilerplate/internal/config"
 	"go-chi-boilerplate/internal/core/services"
 	"log/slog"
 
@@ -13,22 +15,29 @@ import (
 )
 
 // AddAPIRoutes registers all API v1 routes
-func AddAPIRoutes(rg chi.Router, db *postgresql.PostgresDB, logger *slog.Logger, jwtSecret string) {
-	// Initialize repos, services, usecases
+func AddAPIRoutes(rg chi.Router, db *postgresql.PostgresDB, logger *slog.Logger, redisDB *redis.RedisDB, cfg *config.AppConfigs) {
+	// Initialize database repositories
 	userRepo := postgresql.NewUserRepository(db.DB)
 	userUsecase := user.NewUserUsecase(userRepo)
 
-	jwtService := services.NewJWTService(jwtSecret)
-	authUsecase := auth.NewAuthUsecase(userRepo, jwtService, logger)
+	// Initialize JWT service
+	jwtService := services.NewJWTService(cfg.Server.JWTSecret)
+
+	// Initialize refresh token repository here
+	refreshRepo := redis.NewRefreshTokenRepository(redisDB, cfg.Redis.Prefix, cfg.Redis.TTL)
+
+	// Initialize auth usecase
+	authUsecase := auth.NewAuthUsecase(userRepo, jwtService, logger, refreshRepo, cfg.Redis.TTL)
 
 	api := chi.NewRouter()
 
 	// Versioned API prefix
 	v1 := chi.NewRouter()
 
-	// Auth routes
+	// Auth endpoints
 	v1.Post("/auth/login", handlers.LoginHandler(authUsecase))
-
+	v1.Post("/auth/refresh", handlers.RefreshHandler(authUsecase))
+	v1.Post("/auth/logout", handlers.LogoutHandler(authUsecase))
 	// Protected routes
 	v1.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(jwtService.TokenAuth))

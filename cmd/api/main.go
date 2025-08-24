@@ -72,7 +72,7 @@ func main() {
 	}
 
 	// Start server
-	server.New(cfg.Server, logger, db, redisDB).Run()
+	server.New(cfg, logger, db, redisDB).Run()
 }
 
 func shutdownTracer(tp interface{ Shutdown(context.Context) error }, logger *slog.Logger) {

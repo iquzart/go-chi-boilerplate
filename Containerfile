@@ -19,7 +19,7 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest && \
 COPY . .
 
 RUN swag init -g cmd/api/main.go --output docs && \
-  swagger2openapi -o docs/openapi.json docs/swagger.json && \
+  swagger2openapi -o docs/v3/openapi.json docs/swagger.json && \
   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
   -ldflags="-s -w -extldflags '-static'" \
   -a -installsuffix cgo \

@@ -30,10 +30,12 @@ type DatabaseConfigs struct {
 }
 
 type RedisConfigs struct {
-	Addr     string
-	Password string
-	DB       int
-	Prefix   string
+	Host     string        `mapstructure:"host"`
+	Port     string        `mapstructure:"port"`
+	Password string        `mapstructure:"password"`
+	DB       int           `mapstructure:"db"`
+	Prefix   string        `mapstructure:"prefix"`
+	TTL      time.Duration `mapstructure:"ttl"`
 }
 
 // AppConfigs holds all configs for the service
@@ -70,10 +72,12 @@ func GetAppConfigs() (*AppConfigs, error) {
 	}
 
 	redisCfg := &RedisConfigs{
-		Addr:     getEnvOrDefault("REDIS_ADDR", "redis:6379"),
+		Host:     getEnvOrDefault("REDIS_HOST", "redis"),
+		Port:     getEnvOrDefault("REDIS_PORT", "6379"),
 		Password: getEnvOrDefault("REDIS_PASSWORD", ""),
 		DB:       getEnvOrDefaultInt("REDIS_DB", 0),
 		Prefix:   getEnvOrDefault("REDIS_PREFIX", "go-chi-boilerplate:"),
+		TTL:      getEnvOrDefaultDuration("REDIS_TTL", time.Hour), // default 1h
 	}
 
 	if err := redisCfg.Validate(); err != nil {
@@ -114,16 +118,19 @@ func (d *DatabaseConfigs) Validate() error {
 func (r *RedisConfigs) Validate() error {
 	var missing []string
 
-	if r.Addr == "" {
-		missing = append(missing, "REDIS_ADDR")
+	if r.Host == "" {
+		missing = append(missing, "REDIS_HOST")
 	}
-	if r.Password == "" {
-		missing = append(missing, "REDIS_PASSWORD")
+	if r.Port == "" {
+		missing = append(missing, "REDIS_PORT")
 	}
+	// Password can be optional depending on deployment, so don’t force it
 	if r.Prefix == "" {
 		missing = append(missing, "REDIS_PREFIX")
 	}
-	// DB can default to 0 → no validation
+	if r.TTL <= 0 {
+		missing = append(missing, "REDIS_TTL (must be > 0)")
+	}
 
 	if len(missing) > 0 {
 		return errors.New("redis configuration is incomplete, missing: " + strings.Join(missing, ", "))
