@@ -93,7 +93,8 @@ func LogoutHandler(authUC *auth.AuthUsecase) http.HandlerFunc {
 		}
 		json.NewDecoder(r.Body).Decode(&req)
 
-		if err := authUC.Logout(r.Context(), req.UserID); err != nil {
+		ip := r.RemoteAddr
+		if err := authUC.Logout(r.Context(), req.UserID, ip); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return

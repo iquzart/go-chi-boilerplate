@@ -62,7 +62,7 @@ func (a *AuthUsecase) Login(email, password, ip string) (string, string, error) 
 		return "", "", errors.New("failed to save refresh token")
 	}
 
-	meta.AuthEvent(a.Logger, "login_success", user.ID, email, user.Role, ip, "")
+	meta.AuthEvent(a.Logger, "login_success", user.ID, email, user.Role, ip, "user logged in")
 	return accessToken, refreshToken, nil
 }
 
@@ -88,6 +88,16 @@ func (a *AuthUsecase) RefreshAccessToken(ctx context.Context, userID, token stri
 }
 
 // Logout removes the refresh token from the repository
-func (a *AuthUsecase) Logout(ctx context.Context, userID string) error {
-	return a.RefreshRepo.DeleteRefreshToken(ctx, userID)
+func (a *AuthUsecase) Logout(ctx context.Context, userID string, ip string) error {
+	user, _ := a.UserRepo.GetByID(userID)
+	meta.AuthEvent(a.Logger, "logout_success", userID, user.Email, user.Role, ip, "user logged out")
+
+	err := a.RefreshRepo.DeleteRefreshToken(context.Background(), userID)
+	if err != nil {
+		// Log an error if the deletion fails
+		meta.AuthEvent(a.Logger, "logout_failed", userID, "", "", "", "failed to delete refresh token")
+		return err
+	}
+
+	return nil
 }
