@@ -23,7 +23,7 @@ func (s *JWTService) GenerateAccessToken(userID string, role string) (string, er
 	claims := map[string]interface{}{
 		"sub":  userID,
 		"role": role,
-		"exp":  time.Now().Add(3 * time.Minute).Unix(), // 3-minute expiry
+		"exp":  time.Now().Add(15 * time.Minute).Unix(), // 15 minute expiry
 	}
 
 	_, tokenString, err := s.TokenAuth.Encode(claims)
