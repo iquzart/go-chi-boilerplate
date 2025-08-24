@@ -8,7 +8,7 @@ type CreateUserRequest struct {
 	LastName  string `json:"last_name" example:"Doe" validate:"required" description:"User's last name"`
 	Email     string `json:"email" example:"john.doe@example.com" validate:"required,email" description:"User's email address"`
 	Role      string `json:"role" example:"admin" validate:"required" description:"Role assigned to the user"`
-	Password  string `json:"password" example:"StrongPass123!" validate:"required,min=8" description:"Password for the user account"`
+	Password  string `json:"password" example:"P@ssw0rd" validate:"required,min=8" description:"Password for the user account"`
 }
 
 // UpdateUserRequest represents the payload to update an existing user
