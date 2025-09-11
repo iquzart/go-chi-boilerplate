@@ -46,9 +46,24 @@ jobs:
         run: |
           docker build -t go-chi-app:latest -f Containerfile .
 
-      - name: Test Docker Image
+      - name: Test Full Stack with Docker Compose
         run: |
-          docker run --rm -d --name go-chi-app -p 8080:8080 go-chi-app:latest
-          sleep 5
-          curl -f http://localhost:8080/system/health
-          docker stop go-chi-app
+          make compose-up
+
+          echo "Waiting for Go service to be healthy..."
+          timeout=60
+          while ! curl -sSf http://localhost:8080/system/health; do
+            sleep 2
+            timeout=$((timeout-2))
+            if [ $timeout -le 0 ]; then
+              echo "Go service did not become healthy in time"
+              make compose-down
+              exit 1
+            fi
+          done
+
+          echo "Go service is healthy!"
+
+          curl -sSf http://localhost:8080/api/version
+
+          make compose-down

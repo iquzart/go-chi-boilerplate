@@ -31,6 +31,9 @@ func AddAPIRoutes(rg chi.Router, db *postgresql.PostgresDB, logger *slog.Logger,
 
 	api := chi.NewRouter()
 
+	// API version endpoint
+	api.Get("/version", handlers.APIVersion)
+
 	// Versioned API prefix
 	v1 := chi.NewRouter()
 
