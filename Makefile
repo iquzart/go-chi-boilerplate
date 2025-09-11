@@ -40,10 +40,10 @@ docker-stop: ## Stop Docker container
 	docker rm $(DOCKER_CONTAINER) || true
 
 compose-up: ## Start services using docker-compose
-	docker-compose up -d --build
+	docker compose up -d --build
 
 compose-down: ## Stop services using docker-compose
-	docker-compose down
+	docker compose down
 
 swagger: ## Generate swagger 2.0 and convert it to OpenAPI v3
 	swag init -g cmd/api/main.go -o docs
