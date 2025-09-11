@@ -18,41 +18,41 @@ import (
 // SQL Queries as constants
 const (
 	createUserQuery = `
-	INSERT INTO users (first_name, last_name, email, role, password, status, created_at, updated_at)
+	INSERT INTO auth.users (first_name, last_name, email, role, password, status, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	RETURNING id, created_at, updated_at
 	`
 
 	getUserByIDQuery = `
 	SELECT id, first_name, last_name, email, role, password, status, created_at, updated_at
-	FROM users WHERE id = $1
+	FROM auth.users WHERE id = $1
 	`
 
 	listUsersQuery = `
 	SELECT id, first_name, last_name, email, role, status, created_at, updated_at
-	FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2
+	FROM auth.users ORDER BY created_at DESC LIMIT $1 OFFSET $2
 	`
 
-	countUsersQuery = `SELECT COUNT(*) FROM users`
+	countUsersQuery = `SELECT COUNT(*) FROM auth.users`
 
 	updateUserQuery = `
-	UPDATE users SET first_name = $1, last_name = $2, email = $3, role = $4, updated_at = $5
+	UPDATE auth.users SET first_name = $1, last_name = $2, email = $3, role = $4, updated_at = $5
 	WHERE id = $6 RETURNING created_at, updated_at
 	`
 
 	updateUserStatusQuery = `
-	UPDATE users SET status = $1, updated_at = $2 WHERE id = $3
+	UPDATE auth.users SET status = $1, updated_at = $2 WHERE id = $3
 	RETURNING first_name, last_name, email, role, created_at, updated_at
 	`
 
-	deleteUserQuery = `DELETE FROM users WHERE id = $1`
+	deleteUserQuery = `DELETE FROM auth.users WHERE id = $1`
 
 	getUserByEmailQuery = `
 	SELECT id, first_name, last_name, email, role, password, status, created_at, updated_at
-	FROM users WHERE email = $1
+	FROM auth.users WHERE email = $1
 	`
 
-	existsByEmailQuery = `SELECT COUNT(1) FROM users WHERE email = $1`
+	existsByEmailQuery = `SELECT COUNT(1) FROM auth.users WHERE email = $1`
 )
 
 type userRepository struct {
