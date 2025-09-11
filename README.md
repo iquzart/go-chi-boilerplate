@@ -134,7 +134,7 @@ Volumes are used for persistent storage:
 | ----------------- | --------------------------- |
 | `/system/health`  | Health check for Kubernetes |
 | `/system/metrics` | Prometheus metrics          |
-| `/system/version` | Returns API version         |
+| `/api/version` | Returns API version         |
 | `/swagger/*`      | Swagger documentation       |
 
 ---
