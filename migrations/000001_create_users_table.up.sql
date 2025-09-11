@@ -1,7 +1,10 @@
 -- +migrate Up
 
--- Create users table
-CREATE TABLE IF NOT EXISTS users (
+-- Create schema for auth service
+CREATE SCHEMA IF NOT EXISTS auth;
+
+-- Create users table under auth schema
+CREATE TABLE IF NOT EXISTS auth.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
@@ -14,15 +17,15 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- faster lookups by email
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_email ON auth.users(email);
 
 -- Insert the admin user with a hashed password
-INSERT INTO users (first_name, last_name, email, role, password, status)
+INSERT INTO auth.users (first_name, last_name, email, role, password, status)
 VALUES (
     'Admin',
     'User',
     'admin@admin.com',
     'admin',
-    '$2a$12$q3t4nJVrzQeU8XzaeJyVxOyFcVqhjUKapyl234VYjk7rJfvc8sENq', -- Hashed password for 'P@ssw0rd'
+    '$2a$12$q3t4nJVrzQeU8XzaeJyVxOyFcVqhjUKapyl234VYjk7rJfvc8sENq', -- 'P@ssw0rd'
     'active'
 );
