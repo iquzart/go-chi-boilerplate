@@ -67,7 +67,7 @@ services:
     image: *tempoImage
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
-      - ./stack-configs/tempo.yaml:/etc/tempo.yaml
+      - ./infra/tempo.yaml:/etc/tempo.yaml
       - tempo_data:/var/tempo
     ports:
       - "3200:3200" # tempo
@@ -80,7 +80,7 @@ services:
     image: otel/opentelemetry-collector:0.86.0
     command: ["--config=/etc/otel-collector.yaml"]
     volumes:
-      - ./stack-configs/otel-collector.yaml:/etc/otel-collector.yaml
+      - ./infra/otel-collector.yaml:/etc/otel-collector.yaml
 
   prometheus:
     image: prom/prometheus:latest
@@ -90,14 +90,14 @@ services:
       - --enable-feature=exemplar-storage
       - --enable-feature=native-histograms
     volumes:
-      - ./stack-configs/prometheus.yaml:/etc/prometheus.yaml
+      - ./infra/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - "9090:9090"
 
   grafana:
     image: grafana/grafana:latest
     volumes:
-      - ./stack-configs/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./infra/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
