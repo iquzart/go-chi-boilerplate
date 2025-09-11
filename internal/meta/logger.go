@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"os"
 	"strings"
-	"time"
 )
 
 // NewLogger creates and returns a new structured JSON logger with the specified log level.
@@ -50,7 +49,6 @@ func AuthEvent(logger *slog.Logger, event, userID, email, role, ip, reason strin
 		slog.String("role", role),
 		slog.String("ip", ip),
 		slog.String("reason", reason),
-		slog.String("time", time.Now().Format(time.RFC3339)),
 	)
 }
 
