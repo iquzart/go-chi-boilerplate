@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type ServerConfigs struct {
 	ServiceName  string
 	LogLevel     string
 	OTLPEndpoint string
+	JWTSecret    string
 }
 
 type DatabaseConfigs struct {
@@ -27,10 +29,20 @@ type DatabaseConfigs struct {
 	MaxLifetime  time.Duration
 }
 
+type RedisConfigs struct {
+	Host     string        `mapstructure:"host"`
+	Port     string        `mapstructure:"port"`
+	Password string        `mapstructure:"password"`
+	DB       int           `mapstructure:"db"`
+	Prefix   string        `mapstructure:"prefix"`
+	TTL      time.Duration `mapstructure:"ttl"`
+}
+
 // AppConfigs holds all configs for the service
 type AppConfigs struct {
 	Server   *ServerConfigs
 	Database *DatabaseConfigs
+	Redis    *RedisConfigs
 }
 
 // GetAppConfigs loads all configs (server + db) and validates them
@@ -40,6 +52,7 @@ func GetAppConfigs() (*AppConfigs, error) {
 		ServiceName:  getEnvOrDefault("SERVICE_NAME", "go-chi-boilerplate"),
 		LogLevel:     getEnvOrDefault("LOG_LEVEL", "info"),
 		OTLPEndpoint: getEnvOrDefault("OTLP_ENDPOINT", "otelcollector:4317"),
+		JWTSecret:    getEnvOrDefault("JWT_SECRET", "supersecret"),
 	}
 
 	dbCfg := &DatabaseConfigs{
@@ -58,16 +71,69 @@ func GetAppConfigs() (*AppConfigs, error) {
 		return nil, err
 	}
 
+	redisCfg := &RedisConfigs{
+		Host:     getEnvOrDefault("REDIS_HOST", "redis"),
+		Port:     getEnvOrDefault("REDIS_PORT", "6379"),
+		Password: getEnvOrDefault("REDIS_PASSWORD", ""),
+		DB:       getEnvOrDefaultInt("REDIS_DB", 0),
+		Prefix:   getEnvOrDefault("REDIS_PREFIX", "go-chi-boilerplate:"),
+		TTL:      getEnvOrDefaultDuration("REDIS_TTL", time.Hour), // default 1h
+	}
+
+	if err := redisCfg.Validate(); err != nil {
+		return nil, err
+	}
+
 	return &AppConfigs{
 		Server:   serverCfg,
 		Database: dbCfg,
+		Redis:    redisCfg,
 	}, nil
 }
 
 // Validate checks if required DB configs are present
 func (d *DatabaseConfigs) Validate() error {
-	if d.Host == "" || d.User == "" || d.Password == "" || d.DBName == "" {
-		return errors.New("database configuration is incomplete: DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME are required")
+	missing := []string{}
+
+	if d.Host == "" {
+		missing = append(missing, "DB_HOST")
+	}
+	if d.User == "" {
+		missing = append(missing, "DB_USER")
+	}
+	if d.Password == "" {
+		missing = append(missing, "DB_PASSWORD")
+	}
+	if d.DBName == "" {
+		missing = append(missing, "DB_NAME")
+	}
+
+	if len(missing) > 0 {
+		return errors.New("database configuration is incomplete, missing: " + strings.Join(missing, ", "))
+	}
+	return nil
+}
+
+// Validate checks if required Redis configs are present
+func (r *RedisConfigs) Validate() error {
+	var missing []string
+
+	if r.Host == "" {
+		missing = append(missing, "REDIS_HOST")
+	}
+	if r.Port == "" {
+		missing = append(missing, "REDIS_PORT")
+	}
+	// Password can be optional depending on deployment, so don’t force it
+	if r.Prefix == "" {
+		missing = append(missing, "REDIS_PREFIX")
+	}
+	if r.TTL <= 0 {
+		missing = append(missing, "REDIS_TTL (must be > 0)")
+	}
+
+	if len(missing) > 0 {
+		return errors.New("redis configuration is incomplete, missing: " + strings.Join(missing, ", "))
 	}
 	return nil
 }

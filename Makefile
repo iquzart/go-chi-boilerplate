@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
-.PHONY: help clean build run docker-build docker-run docker-stop compose-up compose-down
+.PHONY: help clean build run docker-build docker-run docker-stop compose-up compose-down swagger
 
 # Define variables
-BINARY_NAME := chi-boilerplate
-DOCKER_IMAGE := chi-boilerplate
-DOCKER_CONTAINER := chi-boilerplate
+BINARY_NAME := go-chi-boilerplate 
+DOCKER_IMAGE := go-chi-boilerplate
+DOCKER_CONTAINER := go-chi-boilerplate
 MAIN_FILE := cmd/api/main.go
 LDFLAGS := -ldflags="-s -w"
 
@@ -23,8 +23,7 @@ clean: ## Remove binary file and container resources
 build: ## Build the binary file
 	go build $(LDFLAGS) -o $(BINARY_NAME) $(MAIN_FILE)
 
-run: ## Build and run the binary file locally
-	swag init -g cmd/api/main.go -o docs
+run: swagger ## Build and run the binary file locally
 	go run $(LDFLAGS) $(MAIN_FILE)
 
 docker-build: ## Build Docker image
@@ -45,4 +44,9 @@ compose-up: ## Start services using docker-compose
 
 compose-down: ## Stop services using docker-compose
 	docker-compose down
+
+swagger: ## Generate swagger 2.0 and convert it to OpenAPI v3
+	swag init -g cmd/api/main.go -o docs
+	docker run --rm -v $(PWD)/docs:/docs shaelmaar/swagger2openapi:node-12.12.0 \
+	  swagger2openapi -o /docs/v3/openapi.json /docs/swagger.json
 

@@ -2,8 +2,9 @@ package server
 
 import (
 	"context"
-	"go-chi-boilerplate/internal/adapters/primary/http/router"
-	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
+	"go-chi-boilerplate/internal/adapters/cache/redis"
+	"go-chi-boilerplate/internal/adapters/database/postgresql"
+	"go-chi-boilerplate/internal/adapters/http/router"
 	"go-chi-boilerplate/internal/config"
 	"log/slog"
 	"net/http"
@@ -19,14 +20,14 @@ type Server struct {
 }
 
 // New creates a Server with all dependencies injected
-func New(cfg *config.ServerConfigs, logger *slog.Logger, db *postgresql.PostgresDB) *Server {
-	r := router.SetupRouter(cfg.ServiceName, logger, db)
+func New(cfg *config.AppConfigs, logger *slog.Logger, db *postgresql.PostgresDB, redisDB *redis.RedisDB) *Server {
+	r := router.SetupRouter(cfg, logger, db, redisDB)
 
 	return &Server{
-		cfg:    cfg,
+		cfg:    cfg.Server,
 		logger: logger,
 		http: &http.Server{
-			Addr:    cfg.Port,
+			Addr:    cfg.Server.Port,
 			Handler: r,
 		},
 	}
@@ -38,7 +39,7 @@ func (s *Server) Run() {
 	signal.Notify(stop, os.Interrupt)
 
 	go func() {
-		s.logger.Info("server starting", "port", s.cfg.Port)
+		s.logger.Info("service started", "port", s.cfg.Port)
 		if err := s.http.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			s.logger.Error("error starting server", "error", err)
 		}

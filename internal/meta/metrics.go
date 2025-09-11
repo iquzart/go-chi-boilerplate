@@ -1,7 +1,7 @@
 package meta
 
 import (
-	"go-chi-boilerplate/internal/adapters/secondary/database/postgresql"
+	"go-chi-boilerplate/internal/adapters/database/postgresql"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
