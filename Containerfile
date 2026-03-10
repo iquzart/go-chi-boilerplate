@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine3.20 AS build-env
+FROM golang:1.25-alpine3.22 AS build-env
 
 RUN apk add --no-cache git ca-certificates nodejs npm
 
