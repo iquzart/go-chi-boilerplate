@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -42,9 +42,19 @@ jobs:
         run: |
           go build -ldflags="-s -w" -o app ./cmd/api
 
-      - name: Build Docker Image
+      - name: Build Container Image
         run: |
           docker build -t go-chi-app:latest -f Containerfile .
+
+      - name: Scan ContainerImage with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: go-chi-app:latest
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
 
       - name: Test Full Stack with Docker Compose
         run: |
