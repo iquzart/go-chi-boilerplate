@@ -719,7 +719,7 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 8,
-                    "example": "StrongPass123!"
+                    "example": "P@ssw0rd"
                 },
                 "role": {
                     "type": "string",
@@ -755,7 +755,7 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string",
-                    "example": "P@ssw0rd!"
+                    "example": "P@ssw0rd"
                 }
             }
         },

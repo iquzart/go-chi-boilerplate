@@ -20,7 +20,7 @@ services:
       - DB_NAME=appdb
       - DB_SSLMODE=disable
       # Redis connection
-      - REDIS_HOST=redis
+      - REDIS_HOST=valkey
       - REDIS_PORT=6379
       - REDIS_PASSWORD=redis!password123
       - REDIS_DB=0
@@ -28,7 +28,7 @@ services:
       - REDIS_TTL=1h # supports values like 15m, 1h
     depends_on:
       - postgres
-      - redis
+      - valkey
 
   postgres:
     image: postgres:16
@@ -42,14 +42,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:latest
-    command: ["redis-server", "--requirepass", "redis!password123"]
+  valkey:
+    image: valkey/valkey:latest
+    command: ["valkey-server", "--requirepass", "redis!password123"]
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - valkey_data:/data
 
   # Tempo runs as user 10001, and docker compose creates the volume as root.
   # As such, we need to chown the volume in order for Tempo to start correctly.
@@ -108,5 +108,5 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
+  valkey_data:
   tempo_data:
