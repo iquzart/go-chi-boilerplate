@@ -49,7 +49,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - cache_data:/data
+      - valkey_data:/data
 
   # Tempo runs as user 10001, and docker compose creates the volume as root.
   # As such, we need to chown the volume in order for Tempo to start correctly.
