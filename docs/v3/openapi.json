@@ -17,7 +17,7 @@
     "paths": {
         "/api/v1/auth/login": {
             "post": {
-                "description": "Login with email and password to get JWT token",
+                "description": "Login with email and password to get JWT token pair",
                 "tags": [
                     "authentication"
                 ],
@@ -46,6 +46,115 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "description": "Invalidate the user's refresh token (logout)",
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Logout user",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "description": "User ID",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "description": "Get a new access token using a valid refresh token",
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Refresh access token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "description": "Refresh token info",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -593,7 +702,7 @@
         },
         "/system/readiness": {
             "get": {
-                "description": "Readiness probe for Kubernetes (checks DB connectivity)",
+                "description": "Readiness probe for Kubernetes (checks PostgreSQL and Redis connectivity)",
                 "tags": [
                     "system"
                 ],
@@ -681,7 +790,7 @@
                     "password": {
                         "type": "string",
                         "minLength": 8,
-                        "example": "StrongPass123!"
+                        "example": "P@ssw0rd"
                     },
                     "role": {
                         "type": "string",
@@ -717,7 +826,7 @@
                     },
                     "password": {
                         "type": "string",
-                        "example": "P@ssw0rd!"
+                        "example": "P@ssw0rd"
                     }
                 }
             },
@@ -727,6 +836,10 @@
                     "access_token": {
                         "type": "string",
                         "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                    },
+                    "refresh_token": {
+                        "type": "string",
+                        "example": "dGhpc19pc19hX3JlZnJlc2hfdG9rZW4="
                     }
                 }
             },

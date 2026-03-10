@@ -23,7 +23,7 @@ definitions:
         example: Doe
         type: string
       password:
-        example: StrongPass123!
+        example: P@ssw0rd
         minLength: 8
         type: string
       role:
@@ -52,7 +52,7 @@ definitions:
         format: email
         type: string
       password:
-        example: P@ssw0rd!
+        example: P@ssw0rd
         type: string
     required:
     - email
